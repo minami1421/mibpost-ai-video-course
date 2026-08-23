@@ -36,3 +36,70 @@ V7 PAYMENT FLOW
 - Form -> payment page -> SCB account details -> upload slip -> Google Apps Script -> Google Drive + Google Sheet
 - QR image encodes the account number only; it is not PromptPay / Thai QR Payment and does not lock an amount.
 - Update deployed Apps Script using google-apps-script.gs and create a new deployment version.
+
+
+
+V8 SLIP FIX
+============
+แก้ปัญหาสลิปหายแล้ว:
+1) Apps Script จะสร้างชีตใหม่ชื่อ "Registrations" อัตโนมัติ
+2) สลิปจะถูกเก็บใน Google Drive โฟลเดอร์ "AI Video Course Slips"
+3) ในชีต Registrations จะมีคอลัมน์ "Slip URL" กดเปิดไฟล์ได้
+4) เว็บจะถือว่าส่งสำเร็จต่อเมื่อ Apps Script ตอบ success:true เท่านั้น
+
+วิธีอัปเดต Apps Script:
+- Extensions > Apps Script
+- วาง google-apps-script.gs นี้แทนโค้ดเดิม
+- Save
+- รัน setupRegistrationSystem() 1 ครั้งเพื่ออนุญาต Google Drive + Google Sheets
+- Deploy > Manage deployments > Edit
+- Version: New version
+- Deploy
+- ใช้ Web App URL เดิมได้
+
+
+
+V9 SYNCED VERSION
+=================
+หน้าเว็บและ Apps Script ใช้ field name ชุดเดียวกันแล้ว
+
+Frontend -> Backend:
+fullName
+phone
+line
+email
+course
+privatePeople
+amount
+paymentStatus
+source
+referrer
+facebook
+instagram
+tiktok
+youtube
+editingExperience
+editingSoftware
+editingSoftwareOther
+aiExperience
+aiTools
+aiToolsOther
+learningGoal
+learningGoalOther
+goal
+note
+registrationId
+slipName
+slipType
+slipDataUrl
+
+หลังอัปเว็บ V9 ขึ้น GitHub:
+1. ไป Google Sheet > Extensions > Apps Script
+2. วาง google-apps-script.gs ตัวนี้แทนของเดิม
+3. Save
+4. เลือก setupRegistrationSystem แล้ว Run 1 ครั้ง
+5. อนุญาต Google Sheets + Google Drive
+6. Deploy > Manage deployments > Edit
+7. เลือก New version
+8. Deploy
+9. URL /exec เดิมใช้ต่อได้ ไม่ต้องแก้เว็บ

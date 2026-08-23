@@ -246,14 +246,21 @@ confirmPayment.addEventListener('click', async ()=>{
       slipDataUrl
     };
 
-    await fetch(GOOGLE_SCRIPT_URL, {
+    const response = await fetch(GOOGLE_SCRIPT_URL, {
       method: 'POST',
-      mode: 'no-cors',
       headers: {'Content-Type':'text/plain;charset=utf-8'},
       body: JSON.stringify(payload)
     });
 
-    paymentStatus.innerHTML = `ส่งเรียบร้อยแล้ว ✓<br><b>เลขอ้างอิง ${registrationId}</b><br>ทีมงานจะตรวจสลิปและติดต่อกลับ`;
+    const resultText = await response.text();
+    let result = {};
+    try { result = JSON.parse(resultText); } catch (_) {}
+
+    if (!response.ok || result.success === false) {
+      throw new Error(result.message || `HTTP ${response.status}`);
+    }
+
+    paymentStatus.innerHTML = `ส่งเรียบร้อยแล้ว ✓<br><b>เลขอ้างอิง ${registrationId}</b><br>สลิปถูกบันทึกแล้ว ทีมงานจะตรวจสอบและติดต่อกลับ`;
     paymentStatus.style.color = '#68e27e';
     confirmPayment.textContent = 'ส่งข้อมูลเรียบร้อยแล้ว ✓';
     form.reset();
