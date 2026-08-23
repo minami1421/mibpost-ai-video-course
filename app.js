@@ -23,6 +23,8 @@ const slipFileName = document.getElementById('slipFileName');
 const slipPreviewWrap = document.getElementById('slipPreviewWrap');
 const slipPreview = document.getElementById('slipPreview');
 const paymentStatus = document.getElementById('paymentStatus');
+const scheduleError = document.getElementById('scheduleError');
+const lineFollowup = document.getElementById('lineFollowup');
 
 let pendingPayload = null;
 
@@ -108,6 +110,8 @@ function buildPayload(){
   const learningGoalRaw = fd.get('learningGoal') || '';
   const learningGoal = learningGoalRaw === 'other' ? `อื่น ๆ: ${learningGoalOther}` : learningGoalRaw;
   const goal = fd.get('goal') || '';
+  const preferredDays = fd.getAll('preferredDays').join(', ');
+  const preferredTimes = fd.getAll('preferredTimes').join(', ');
 
   const note = [
     `ประสบการณ์ตัดต่อ: ${editingExperience}`,
@@ -116,6 +120,8 @@ function buildPayload(){
     `AI ที่เคยใช้: ${aiTools || '-'}`,
     `เป้าหมายเรียน: ${learningGoal}`,
     `อยากให้ AI ช่วย: ${goal || '-'}`,
+    `วันที่สะดวก: ${preferredDays || '-'}`,
+    `ช่วงเวลาที่สะดวก: ${preferredTimes || '-'}`,
     `Facebook: ${fd.get('facebook') || '-'}`,
     `Instagram: ${fd.get('instagram') || '-'}`,
     `TikTok: ${fd.get('tiktok') || '-'}`,
@@ -143,6 +149,8 @@ function buildPayload(){
     aiToolsOther,
     learningGoal,
     learningGoalOther,
+    preferredDays,
+    preferredTimes,
     goal,
     note
   };
@@ -153,6 +161,14 @@ form.addEventListener('submit', (e)=>{
   if (!form.reportValidity()) return;
 
   pendingPayload = buildPayload();
+
+  if (!pendingPayload.preferredDays || !pendingPayload.preferredTimes) {
+    scheduleError.classList.remove('hidden');
+    document.querySelector('.schedule-section')?.scrollIntoView({behavior:'smooth', block:'center'});
+    return;
+  }
+  scheduleError.classList.add('hidden');
+
   const amount = COURSE_AMOUNT[pendingPayload.course];
   if (!amount) {
     statusEl.textContent = 'กรุณาเลือกแพ็กเกจก่อน';
@@ -165,6 +181,7 @@ form.addEventListener('submit', (e)=>{
 
   statusEl.textContent = '';
   paymentStatus.textContent = '';
+  lineFollowup?.classList.add('hidden');
   paymentSection.classList.remove('hidden');
   setTimeout(()=>paymentSection.scrollIntoView({behavior:'smooth', block:'start'}), 60);
 });
@@ -260,8 +277,9 @@ confirmPayment.addEventListener('click', async ()=>{
       throw new Error(result.message || `HTTP ${response.status}`);
     }
 
-    paymentStatus.innerHTML = `ส่งเรียบร้อยแล้ว ✓<br><b>เลขอ้างอิง ${registrationId}</b><br>สลิปถูกบันทึกแล้ว ทีมงานจะตรวจสอบและติดต่อกลับ`;
+    paymentStatus.innerHTML = `ส่งเรียบร้อยแล้ว ✓<br><b>เลขอ้างอิง ${registrationId}</b><br>สลิปถูกบันทึกแล้ว กรุณาแอด LINE ด้านล่างเพื่อแจ้งการโอนเงินและรับวันนัดหมาย`;
     paymentStatus.style.color = '#68e27e';
+    lineFollowup?.classList.remove('hidden');
     confirmPayment.textContent = 'ส่งข้อมูลเรียบร้อยแล้ว ✓';
     form.reset();
     paymentSlip.value = '';

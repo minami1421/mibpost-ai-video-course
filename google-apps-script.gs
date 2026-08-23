@@ -27,6 +27,8 @@ const HEADERS = [
   "AI อื่น ๆ",
   "เป้าหมายที่มาเรียน",
   "เป้าหมายอื่น ๆ",
+  "วันที่สะดวกเรียน",
+  "ช่วงเวลาที่สะดวกเรียน",
   "อยากให้ AI ช่วยอะไรเป็นพิเศษ",
   "หมายเหตุรวม"
 ];
@@ -39,7 +41,6 @@ function getRegistrationSheet_() {
     sheet = ss.insertSheet(SHEET_NAME);
   }
 
-  // เขียน header ให้ตรงกับ frontend/backend เสมอ
   sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
   sheet.getRange(1, 1, 1, HEADERS.length)
     .setFontWeight("bold")
@@ -89,7 +90,6 @@ function saveSlip_(data) {
     )
   );
 
-  // ไม่เปิดไฟล์เป็น public
   return file.getUrl();
 }
 
@@ -101,7 +101,6 @@ function doPost(e) {
 
     const data = JSON.parse(e.postData.contents);
     const sheet = getRegistrationSheet_();
-
     const slipUrl = saveSlip_(data);
 
     sheet.appendRow([
@@ -130,6 +129,8 @@ function doPost(e) {
       data.aiToolsOther || "",
       data.learningGoal || "",
       data.learningGoalOther || "",
+      data.preferredDays || "",
+      data.preferredTimes || "",
       data.goal || "",
       data.note || ""
     ]);
@@ -146,25 +147,16 @@ function doPost(e) {
     return ContentService
       .createTextOutput(JSON.stringify({
         success: false,
-        message: String(
-          error && error.message ? error.message : error
-        )
+        message: String(error && error.message ? error.message : error)
       }))
       .setMimeType(ContentService.MimeType.JSON);
   }
 }
 
-// รัน 1 ครั้งหลังวางโค้ด เพื่อสร้าง Sheet + Folder และอนุญาตสิทธิ์ Drive/Sheets
 function setupRegistrationSystem() {
   const sheet = getRegistrationSheet_();
   const folder = getSlipFolder_();
 
   Logger.log("Sheet: " + sheet.getName());
-  Logger.log("Slip folder: " + folder.getUrl());
-
-  return {
-    sheetName: sheet.getName(),
-    slipFolderId: folder.getId(),
-    slipFolderUrl: folder.getUrl()
-  };
+  Logger.log("Slip Folder: " + folder.getUrl());
 }

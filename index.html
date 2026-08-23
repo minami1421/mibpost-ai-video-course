@@ -247,7 +247,34 @@
 
           <fieldset class="choice-fieldset">
             <legend>AI ที่เคยใช้</legend>
-            <div class="choice-grid">
+            
+        <div class="form-divider"></div>
+        <div class="form-section schedule-section">
+          <div class="section-title">วันที่และช่วงเวลาที่สะดวกเรียน</div>
+          <p class="section-help">ยังไม่กำหนดวันเรียนจริง ระบบจะใช้ข้อมูลนี้เพื่อจัดกลุ่มและนัดหมายภายหลัง • เลือกได้มากกว่า 1 ตัวเลือก</p>
+
+          <div class="schedule-grid">
+            <div>
+              <label class="field-label">วันที่สะดวก *</label>
+              <div class="choice-grid" id="preferredDaysGroup">
+                <label class="choice-card"><input type="checkbox" name="preferredDays" value="จันทร์–ศุกร์"><span>จันทร์–ศุกร์</span></label>
+                <label class="choice-card"><input type="checkbox" name="preferredDays" value="เสาร์–อาทิตย์"><span>เสาร์–อาทิตย์</span></label>
+              </div>
+            </div>
+
+            <div>
+              <label class="field-label">ช่วงเวลาที่สะดวก *</label>
+              <div class="choice-grid three" id="preferredTimesGroup">
+                <label class="choice-card"><input type="checkbox" name="preferredTimes" value="เช้า"><span>เช้า</span></label>
+                <label class="choice-card"><input type="checkbox" name="preferredTimes" value="บ่าย"><span>บ่าย</span></label>
+                <label class="choice-card"><input type="checkbox" name="preferredTimes" value="ค่ำ"><span>ค่ำ</span></label>
+              </div>
+            </div>
+          </div>
+          <p id="scheduleError" class="schedule-error hidden">กรุณาเลือกวันที่สะดวกอย่างน้อย 1 ตัวเลือก และช่วงเวลาอย่างน้อย 1 ตัวเลือก</p>
+        </div>
+
+<div class="choice-grid">
               <label class="choice-chip"><input type="checkbox" name="aiTools" value="ChatGPT / Codex"> ChatGPT / Codex</label>
               <label class="choice-chip"><input type="checkbox" name="aiTools" value="Gemini"> Gemini</label>
               <label class="choice-chip"><input type="checkbox" name="aiTools" value="Claude"> Claude</label>
@@ -338,6 +365,19 @@
           <button type="button" id="confirmPayment" class="payment-confirm">ไปหน้าชำระเงิน + สลิปยืนยันการชำระเงิน</button>
         </div>
         <p id="paymentStatus" class="payment-status" aria-live="polite"></p>
+
+        <div id="lineFollowup" class="line-followup hidden">
+          <div class="line-followup-copy">
+            <span class="line-kicker">ขั้นตอนสุดท้าย</span>
+            <h3>แอด LINE เพื่อแจ้งการโอนเงินและรับวันนัดหมาย</h3>
+            <p>หลังส่งสลิปเรียบร้อย กรุณาแอด LINE แล้วส่ง <b>ชื่อ-นามสกุล + เลขอ้างอิงการสมัคร</b> มาในแชต ทีมงานจะตรวจสอบยอดและแจ้งวันเรียนที่ตรงกับช่วงเวลาที่คุณเลือกไว้</p>
+          </div>
+          <div class="line-qr-box">
+            <img src="assets/line-contact-qr.png" alt="QR Code สำหรับแอด LINE ติดต่อทีมงาน">
+            <strong>สแกนเพื่อแอด LINE</strong>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
