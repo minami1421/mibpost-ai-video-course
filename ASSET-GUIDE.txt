@@ -1,0 +1,84 @@
+AI ANIMATION WORKSHOP — ASSET GUIDE
+
+UPLOAD PATH
+-----------
+Put all video files in:
+assets/videos/
+
+The website already knows these filenames. Upload a file with the exact name and it will appear automatically.
+
+VIDEO SLOTS
+-----------
+1) HERO SHOWREEL
+Filename: assets/videos/hero-showreel.mp4
+Recommended: 1920x1080 px
+Aspect ratio: 16:9
+Format: MP4 / H.264
+Suggested duration: 6–15 sec
+Audio: not required; website autoplays muted
+Purpose: Main cinematic showreel near the top of the page.
+
+2) VERTICAL SERIES
+Filename: assets/videos/series-demo.mp4
+Recommended: 1080x1920 px
+Aspect ratio: 9:16
+Format: MP4 / H.264
+Suggested duration: 5–10 sec
+
+3) SHORT FILM
+Filename: assets/videos/shortfilm-demo.mp4
+Recommended: 1080x1920 px
+Aspect ratio: 9:16
+
+4) MV / MUSIC
+Filename: assets/videos/mv-demo.mp4
+Recommended: 1080x1920 px
+Aspect ratio: 9:16
+
+5) PRODUCT / COMMERCIAL
+Filename: assets/videos/product-demo.mp4
+Recommended: 1080x1920 px
+Aspect ratio: 9:16
+
+6) FANTASY
+Filename: assets/videos/fantasy-demo.mp4
+Recommended: 1080x1920 px
+Aspect ratio: 9:16
+
+7) TALKING CHARACTER
+Filename: assets/videos/talking-demo.mp4
+Recommended: 1080x1920 px
+Aspect ratio: 9:16
+
+POSTER IMAGES
+-------------
+If a video has not been uploaded yet, the site displays the poster image automatically:
+assets/images/series-poster.jpg
+assets/images/shortfilm-poster.jpg
+assets/images/mv-poster.jpg
+assets/images/product-poster.jpg
+assets/images/fantasy-poster.jpg
+assets/images/talking-poster.jpg
+
+PAYMENT QR
+----------
+Group 1,990:
+assets/promptpay-1990.png
+
+Existing private-course QR filenames expected from your current GitHub repo:
+assets/promptpay-8990.png
+assets/promptpay-5990.png
+assets/promptpay-4990.png
+
+LINE QR stays unchanged:
+assets/line-contact-qr.png
+
+IMPORTANT
+---------
+Private 2 people:
+Price displayed = 5,990/person
+Payment amount = 11,980 total
+
+Private 3 people:
+Price displayed = 4,990/person
+Payment amount = 14,970 total
