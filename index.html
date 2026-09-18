@@ -246,7 +246,7 @@ form.addEventListener('submit',async e=>{
   if(!days.length||!times.length){statusEl.textContent='กรุณาเลือกวันที่และช่วงเวลาที่สะดวกอย่างน้อย 1 ตัวเลือก';return}
   const opt=course.options[course.selectedIndex];
   registrationId=registrationId||makeId();
-  const payload={action:'register',registrationId,courseCode:course.value,name:form.name.value,phone:form.phone.value,line:form.line.value,email:form.email.value,experience:form.experience.value,tools:checked('tools'),otherAI:form.otherAI.value,goalType:form.goalType.value,style:form.style.value,idea:form.idea.value,device:form.device.value,ram:form.ram.value,subs:checked('subs'),days,times,firstProject:form.firstProject.value};
+  const selectedCourse=course.options[course.selectedIndex]; const payload={action:'register',registrationId,courseCode:course.value,courseName:selectedCourse.textContent.trim(),amount:Number(selectedCourse.dataset.price||0),name:form.name.value,phone:form.phone.value,line:form.line.value,email:form.email.value,experience:form.experience.value,tools:checked('tools'),otherAI:form.otherAI.value,goalType:form.goalType.value,style:form.style.value,idea:form.idea.value,device:form.device.value,ram:form.ram.value,subs:checked('subs'),days,times,firstProject:form.firstProject.value};
   statusEl.textContent='กำลังบันทึกใบสมัคร...';
   try{
     const res=await postToBackend(payload); if(!res.ok)throw new Error(res.error||'บันทึกไม่สำเร็จ');
