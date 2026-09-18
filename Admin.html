@@ -37,7 +37,14 @@ function render(){
     <td>${esc(r['วันที่สะดวกเรียน'])}<br>${esc(r['ช่วงเวลาที่สะดวกเรียน'])}</td>
     <td>${esc(r['วันนัดเรียนยืนยัน']||'—')} ${esc(r['เวลานัดเรียน']||'')}</td>
     <td>${esc(r['สถานะนัด']||'รอนัดหมาย')}</td>
-    <td>${r['Slip URL']?`<button class="btn" style="padding:7px 10px" onclick='openPay(${JSON.stringify(r['Registration ID'])})'>ตรวจสลิป</button>`:'—'}</td>
+    <td>${r['Slip URL'] ? (() => {
+      const ps = r['สถานะการชำระ'];
+      const label = ps === 'ชำระถูกต้อง' ? '✓ ตรวจแล้ว' : (ps === 'สลิปไม่ถูกต้อง' ? 'ตรวจใหม่' : 'ตรวจสลิป');
+      const extra = ps === 'ชำระถูกต้อง'
+        ? 'background:#173c2a;color:#baf5d0;border:1px solid #2d7650'
+        : (ps === 'สลิปไม่ถูกต้อง' ? 'background:#8b2635' : '');
+      return `<button class="btn" style="padding:7px 10px;${extra}" onclick='openPay(${JSON.stringify(r['Registration ID'])})'>${label}</button>`;
+    })() : '—'}</td>
     <td class=edit onclick='openM(${JSON.stringify(r['Registration ID'])})'>แก้นัด</td></tr>`).join('');
 }
 function openPay(id){
