@@ -14,6 +14,7 @@ function doPost(e){
     if(action==='register') out=createRegistration_(p);
     else if(action==='payment') out=confirmPayment_(p);
     else if(action==='appointment') out=saveAppointment_(p);
+    else if(action==='paymentReview') out=savePaymentReview_(p);
     else throw new Error('action ไม่ถูกต้อง');
     return json_(out);
   }catch(err){return json_({ok:false,error:String(err.message||err)})}
@@ -41,6 +42,25 @@ function confirmPayment_(p){
 }
 function getAdminData(){const sh=sheet_(),v=sh.getDataRange().getDisplayValues(),h=v[0]||[];return {headers:h,rows:v.slice(1).filter(r=>r[1]).map(r=>Object.fromEntries(h.map((x,i)=>[x,r[i]||'']))),updatedAt:new Date().toISOString()}}
 function saveAppointment(p){return saveAppointment_(p)}
+function savePaymentReview(p){return savePaymentReview_(p)}
+function savePaymentReview_(p){
+  if(!p.registrationId) throw new Error('ไม่มี Registration ID');
+  const allowed=['ชำระถูกต้อง','สลิปไม่ถูกต้อง','รอตรวจสอบ'];
+  if(!allowed.includes(p.status)) throw new Error('สถานะการชำระไม่ถูกต้อง');
+  const sh=sheet_(), row=findRow_(sh,p.registrationId);
+  const slipUrl=sh.getRange(row,11).getDisplayValue();
+  if(!slipUrl && p.status==='ชำระถูกต้อง') throw new Error('รายการนี้ไม่มีสลิปให้ตรวจสอบ');
+  sh.getRange(row,10).setValue(p.status);
+  sh.getRange(row,28).setValue(new Date());
+  const oldNote=sh.getRange(row,30).getDisplayValue();
+  const reviewNote=(p.note||'').trim();
+  const stamp=Utilities.formatDate(new Date(),Session.getScriptTimeZone(),'yyyy-MM-dd HH:mm');
+  const reviewer=Session.getActiveUser().getEmail()||'admin';
+  const line='['+stamp+'] ตรวจสลิป: '+p.status+(reviewNote?' — '+reviewNote:'')+' ('+reviewer+')';
+  sh.getRange(row,30).setValue(oldNote ? oldNote+'\n'+line : line);
+  SpreadsheetApp.flush();
+  return {ok:true,status:p.status};
+}
 function saveAppointment_(p){if(!p.registrationId)throw new Error('ไม่มี Registration ID');const allowed=['รอนัดหมาย','ยืนยันแล้ว','เรียนแล้ว','เลื่อนนัด','ยกเลิก'];if(!allowed.includes(p.status||'รอนัดหมาย'))throw new Error('สถานะนัดไม่ถูกต้อง');const sh=sheet_(),row=findRow_(sh,p.registrationId);sh.getRange(row,24,1,5).setValues([[p.date||'',p.time||'',p.status||'รอนัดหมาย',p.note||'',new Date()]]);sh.getRange(row,29).setValue(Session.getActiveUser().getEmail()||'admin');SpreadsheetApp.flush();return {ok:true}}
 function findRowMaybe_(sh,id){const n=sh.getLastRow();if(n<2)return 0;const a=sh.getRange(2,2,n-1,1).getDisplayValues().flat(),i=a.indexOf(String(id));return i<0?0:i+2}
 function findRow_(sh,id){const r=findRowMaybe_(sh,id);if(!r)throw new Error('ไม่พบ Registration ID');return r}

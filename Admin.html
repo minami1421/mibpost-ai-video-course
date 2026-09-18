@@ -1,5 +1,65 @@
 <!doctype html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AI Animation Admin</title><style>
 :root{--bg:#07070a;--p:#101014;--line:#302530;--pink:#ff2b82;--text:#fff;--muted:#aaa3ad}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,'Noto Sans Thai',sans-serif}.wrap{width:min(1500px,calc(100% - 28px));margin:auto;padding:28px 0}.top{display:flex;justify-content:space-between;gap:16px;align-items:center}.top h1{margin:0}.pink{color:var(--pink)}button,input,select,textarea{font:inherit}.btn{border:0;background:var(--pink);color:#fff;padding:10px 15px;border-radius:10px;cursor:pointer}.cards{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:22px 0}.card,.panel{background:var(--p);border:1px solid var(--line);border-radius:16px;padding:17px}.card small{color:var(--muted)}.card b{display:block;font-size:28px;margin-top:7px}.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}.filters input,.filters select{background:#0b090c;color:#fff;border:1px solid var(--line);border-radius:9px;padding:10px}.tablebox{overflow:auto}.table{width:100%;border-collapse:collapse;min-width:1200px}.table th,.table td{padding:11px;border-bottom:1px solid #241c25;text-align:left;font-size:13px}.table th{color:#cfc5d0;position:sticky;top:0;background:#101014}.status{padding:4px 8px;border:1px solid #4a3545;border-radius:999px}.link{color:#ff73b0}.edit{cursor:pointer;color:#ff73b0;font-weight:bold}.modal{position:fixed;inset:0;background:#000b;display:none;place-items:center;padding:20px}.modal.show{display:grid}.box{width:min(560px,100%);background:#111014;border:1px solid #493044;border-radius:18px;padding:22px}.box label{display:block;margin:12px 0;color:#ddd}.box input,.box select,.box textarea{width:100%;margin-top:6px;background:#09080a;color:#fff;border:1px solid #3b303c;border-radius:9px;padding:11px}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}.ghost{background:#29232a}@media(max-width:1000px){.cards{grid-template-columns:repeat(2,1fr)}}
-</style></head><body><div class="wrap"><div class="top"><div><small class="pink">AI ANIMATION WORKSHOP</small><h1>Admin Dashboard</h1></div><button class="btn" onclick="load()">รีเฟรช</button></div><div class="cards" id="cards"></div><div class="panel"><div class="filters"><input id="q" placeholder="ค้นหาชื่อ / โทร / ID" oninput="render()"><select id="pay" onchange="render()"><option value="">ทุกสถานะชำระ</option><option>รอชำระเงิน</option><option>รอตรวจสอบ</option><option>ชำระแล้ว</option></select><select id="appt" onchange="render()"><option value="">ทุกสถานะนัด</option><option>รอนัดหมาย</option><option>ยืนยันแล้ว</option><option>เรียนแล้ว</option><option>เลื่อนนัด</option><option>ยกเลิก</option></select></div><div class="tablebox"><table class="table"><thead><tr><th>สมัคร</th><th>ID</th><th>ลูกค้า</th><th>คอร์ส</th><th>ยอด</th><th>ชำระ</th><th>สะดวก</th><th>วันนัดจริง</th><th>สถานะนัด</th><th>สลิป</th><th></th></tr></thead><tbody id="body"></tbody></table></div></div></div>
+</style></head><body><div class="wrap"><div class="top"><div><small class="pink">AI ANIMATION WORKSHOP</small><h1>Admin Dashboard</h1></div><button class="btn" onclick="load()">รีเฟรช</button></div><div class="cards" id="cards"></div><div class="panel"><div class="filters"><input id="q" placeholder="ค้นหาชื่อ / โทร / ID" oninput="render()"><select id="pay" onchange="render()"><option value="">ทุกสถานะชำระ</option><option>รอชำระเงิน</option><option>รอตรวจสอบ</option><option>ชำระถูกต้อง</option><option>สลิปไม่ถูกต้อง</option></select><select id="appt" onchange="render()"><option value="">ทุกสถานะนัด</option><option>รอนัดหมาย</option><option>ยืนยันแล้ว</option><option>เรียนแล้ว</option><option>เลื่อนนัด</option><option>ยกเลิก</option></select></div><div class="tablebox"><table class="table"><thead><tr><th>สมัคร</th><th>ID</th><th>ลูกค้า</th><th>คอร์ส</th><th>ยอด</th><th>ชำระ</th><th>สะดวก</th><th>วันนัดจริง</th><th>สถานะนัด</th><th>สลิป</th><th></th></tr></thead><tbody id="body"></tbody></table></div></div></div>
 <div class="modal" id="modal"><div class="box"><h2>แก้ไขนัดเรียน</h2><div id="who"></div><div class="row"><label>วันนัดจริง<input id="date" type="date"></label><label>เวลา<input id="time" type="time"></label></div><label>สถานะ<select id="status"><option>รอนัดหมาย</option><option>ยืนยันแล้ว</option><option>เรียนแล้ว</option><option>เลื่อนนัด</option><option>ยกเลิก</option></select></label><label>หมายเหตุ<textarea id="note" rows="3"></textarea></label><div class="actions"><button class="btn ghost" onclick="closeM()">ยกเลิก</button><button class="btn" onclick="save()">บันทึกนัด</button></div></div></div>
-<script>let rows=[],current=null;const money=n=>Number(String(n).replace(/,/g,''))||0;function load(){google.script.run.withSuccessHandler(d=>{rows=d.rows||[];render()}).withFailureHandler(e=>alert(e.message)).getAdminData()}function render(){let x=rows.slice(),q=document.getElementById('q').value.toLowerCase(),p=document.getElementById('pay').value,a=document.getElementById('appt').value;if(q)x=x.filter(r=>[r['Registration ID'],r['ชื่อ-นามสกุล'],r['เบอร์โทร']].join(' ').toLowerCase().includes(q));if(p)x=x.filter(r=>r['สถานะการชำระ']==p);if(a)x=x.filter(r=>r['สถานะนัด']==a);let paid=rows.filter(r=>r['สถานะการชำระ']=='ชำระแล้ว'),pending=rows.filter(r=>r['สถานะการชำระ']=='รอตรวจสอบ'),wait=rows.filter(r=>!r['วันนัดเรียนยืนยัน']||r['สถานะนัด']=='รอนัดหมาย');let today=new Date().toISOString().slice(0,10),todayN=rows.filter(r=>r['วันนัดเรียนยืนยัน']==today).length;document.getElementById('cards').innerHTML=`<div class=card><small>สมัครทั้งหมด</small><b>${rows.length}</b></div><div class=card><small>ชำระแล้ว</small><b>${paid.length}</b></div><div class=card><small>รอตรวจสอบ</small><b>${pending.length}</b></div><div class=card><small>รายรับชำระแล้ว</small><b>฿${paid.reduce((s,r)=>s+money(r['ยอดชำระ']),0).toLocaleString()}</b></div><div class=card><small>รอนัดหมาย</small><b>${wait.length}</b></div><div class=card><small>นัดวันนี้</small><b>${todayN}</b></div>`;document.getElementById('body').innerHTML=x.map(r=>`<tr><td>${esc(r['วันที่สมัคร'])}</td><td>${esc(r['Registration ID'])}</td><td><b>${esc(r['ชื่อ-นามสกุล'])}</b><br>${esc(r['เบอร์โทร'])}</td><td>${esc(r['คอร์สที่เลือก'])}</td><td>฿${money(r['ยอดชำระ']).toLocaleString()}</td><td><span class=status>${esc(r['สถานะการชำระ'])}</span></td><td>${esc(r['วันที่สะดวกเรียน'])}<br>${esc(r['ช่วงเวลาที่สะดวกเรียน'])}</td><td>${esc(r['วันนัดเรียนยืนยัน']||'—')} ${esc(r['เวลานัดเรียน']||'')}</td><td>${esc(r['สถานะนัด']||'รอนัดหมาย')}</td><td>${r['Slip URL']?`<a class=link target=_blank href="${esc(r['Slip URL'])}">ดูสลิป</a>`:'—'}</td><td class=edit onclick='openM(${JSON.stringify(r['Registration ID'])})'>แก้นัด</td></tr>`).join('')}function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}function openM(id){current=rows.find(r=>r['Registration ID']==id);who.textContent=current['ชื่อ-นามสกุล']+' • '+current['คอร์สที่เลือก'];date.value=current['วันนัดเรียนยืนยัน']||'';time.value=current['เวลานัดเรียน']||'';status.value=current['สถานะนัด']||'รอนัดหมาย';note.value=current['หมายเหตุนัด']||'';modal.classList.add('show')}function closeM(){modal.classList.remove('show')}function save(){google.script.run.withSuccessHandler(()=>{closeM();load()}).withFailureHandler(e=>alert(e.message)).saveAppointment({registrationId:current['Registration ID'],date:date.value,time:time.value,status:status.value,note:note.value})}load();</script></body></html>
+<div class="modal" id="payModal"><div class="box"><h2>ตรวจสอบการชำระเงิน</h2><div id="payWho"></div>
+<div id="slipBox" style="margin:16px 0;padding:16px;border:1px solid #3b303c;border-radius:12px;background:#09080a"></div>
+<label>หมายเหตุการตรวจสอบ<textarea id="payNote" rows="3" placeholder="เช่น ยอดไม่ครบ / สลิปคนละรายการ / ตรวจสอบแล้วถูกต้อง"></textarea></label>
+<div class="actions"><button class="btn ghost" onclick="closePay()">ปิด</button><button class="btn ghost" style="background:#8b2635" onclick="reviewPayment('สลิปไม่ถูกต้อง')">✕ สลิปไม่ถูกต้อง</button><button class="btn" onclick="reviewPayment('ชำระถูกต้อง')">✓ ยืนยันชำระ</button></div>
+</div></div>
+<script>
+let rows=[],current=null,payCurrent=null;
+const money=n=>Number(String(n).replace(/,/g,''))||0;
+function esc(s){return String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function load(){
+  if(!(window.google&&google.script&&google.script.run)){
+    document.getElementById('body').innerHTML='<tr><td colspan="11" style="padding:25px;color:#ff73b0">หน้านี้ต้องเปิดผ่าน Apps Script Web App (?page=admin) จึงจะอ่านฐานข้อมูลได้</td></tr>';
+    return;
+  }
+  google.script.run.withSuccessHandler(d=>{rows=d.rows||[];render()}).withFailureHandler(e=>alert(e.message)).getAdminData()
+}
+function render(){
+  let x=rows.slice(),q=document.getElementById('q').value.toLowerCase(),p=document.getElementById('pay').value,a=document.getElementById('appt').value;
+  if(q)x=x.filter(r=>[r['Registration ID'],r['ชื่อ-นามสกุล'],r['เบอร์โทร']].join(' ').toLowerCase().includes(q));
+  if(p)x=x.filter(r=>r['สถานะการชำระ']==p);
+  if(a)x=x.filter(r=>r['สถานะนัด']==a);
+  let paid=rows.filter(r=>r['สถานะการชำระ']=='ชำระถูกต้อง'),
+      pending=rows.filter(r=>r['สถานะการชำระ']=='รอตรวจสอบ'),
+      bad=rows.filter(r=>r['สถานะการชำระ']=='สลิปไม่ถูกต้อง'),
+      wait=rows.filter(r=>!r['วันนัดเรียนยืนยัน']||r['สถานะนัด']=='รอนัดหมาย');
+  let today=new Date().toISOString().slice(0,10),todayN=rows.filter(r=>r['วันนัดเรียนยืนยัน']==today).length;
+  document.getElementById('cards').innerHTML=`<div class=card><small>สมัครทั้งหมด</small><b>${rows.length}</b></div><div class=card><small>ชำระถูกต้อง</small><b>${paid.length}</b></div><div class=card><small>รอตรวจสลิป</small><b>${pending.length}</b></div><div class=card><small>สลิปไม่ถูกต้อง</small><b>${bad.length}</b></div><div class=card><small>รายรับยืนยันแล้ว</small><b>฿${paid.reduce((s,r)=>s+money(r['ยอดชำระ']),0).toLocaleString()}</b></div><div class=card><small>รอนัดหมาย</small><b>${wait.length}</b></div>`;
+  document.getElementById('body').innerHTML=x.map(r=>`<tr>
+    <td>${esc(r['วันที่สมัคร'])}</td><td>${esc(r['Registration ID'])}</td>
+    <td><b>${esc(r['ชื่อ-นามสกุล'])}</b><br>${esc(r['เบอร์โทร'])}</td>
+    <td>${esc(r['คอร์สที่เลือก'])}</td><td>฿${money(r['ยอดชำระ']).toLocaleString()}</td>
+    <td><span class=status>${esc(r['สถานะการชำระ'])}</span></td>
+    <td>${esc(r['วันที่สะดวกเรียน'])}<br>${esc(r['ช่วงเวลาที่สะดวกเรียน'])}</td>
+    <td>${esc(r['วันนัดเรียนยืนยัน']||'—')} ${esc(r['เวลานัดเรียน']||'')}</td>
+    <td>${esc(r['สถานะนัด']||'รอนัดหมาย')}</td>
+    <td>${r['Slip URL']?`<button class="btn" style="padding:7px 10px" onclick='openPay(${JSON.stringify(r['Registration ID'])})'>ตรวจสลิป</button>`:'—'}</td>
+    <td class=edit onclick='openM(${JSON.stringify(r['Registration ID'])})'>แก้นัด</td></tr>`).join('');
+}
+function openPay(id){
+  payCurrent=rows.find(r=>r['Registration ID']==id);
+  payWho.innerHTML='<b>'+esc(payCurrent['ชื่อ-นามสกุล'])+'</b> • '+esc(payCurrent['คอร์สที่เลือก'])+' • ฿'+money(payCurrent['ยอดชำระ']).toLocaleString()+'<br><span class=status>'+esc(payCurrent['สถานะการชำระ'])+'</span>';
+  const u=payCurrent['Slip URL'];
+  slipBox.innerHTML=u?`<a class="btn" href="${esc(u)}" target="_blank" rel="noopener">เปิดสลิปต้นฉบับ ↗</a><p style="color:#aaa;margin-bottom:0">ตรวจชื่อผู้รับ ยอดเงิน วันเวลา และรายละเอียดในสลิปก่อนกดยืนยัน</p>`:'<span style="color:#ff73b0">ไม่มีไฟล์สลิป</span>';
+  payNote.value='';
+  payModal.classList.add('show');
+}
+function closePay(){payModal.classList.remove('show')}
+function reviewPayment(status){
+  if(!payCurrent)return;
+  if(status==='ชำระถูกต้อง' && !confirm('ยืนยันว่าตรวจสลิปแล้ว และยอดชำระถูกต้อง?'))return;
+  google.script.run.withSuccessHandler(()=>{closePay();load()}).withFailureHandler(e=>alert(e.message)).savePaymentReview({registrationId:payCurrent['Registration ID'],status,note:payNote.value});
+}
+function openM(id){
+  current=rows.find(r=>r['Registration ID']==id);
+  who.textContent=current['ชื่อ-นามสกุล']+' • '+current['คอร์สที่เลือก'];
+  date.value=current['วันนัดเรียนยืนยัน']||'';time.value=current['เวลานัดเรียน']||'';status.value=current['สถานะนัด']||'รอนัดหมาย';note.value=current['หมายเหตุนัด']||'';modal.classList.add('show')
+}
+function closeM(){modal.classList.remove('show')}
+function save(){google.script.run.withSuccessHandler(()=>{closeM();load()}).withFailureHandler(e=>alert(e.message)).saveAppointment({registrationId:current['Registration ID'],date:date.value,time:time.value,status:status.value,note:note.value})}
+load();
+</script></body></html>

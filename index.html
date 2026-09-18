@@ -165,8 +165,8 @@ body{margin:0;background:radial-gradient(circle at 80% 4%,#3b102a 0,transparent 
       <div class="pay-qr"><div>
         <p>แพ็กเกจ: <b id="payCourse">—</b></p><div class="money"><span id="payAmount">0</span> <small>บาท</small></div>
         <div class="bank"><div><span>ธนาคาร</span><b>ไทยพาณิชย์ (SCB)</b></div><div><span>ชื่อบัญชี</span><b>น.ส. ณปภัช สังหมื่นเหม้า</b></div><div><span>เลขบัญชี</span><b>028-403337-0</b></div></div>
-        <label>แนบหลักฐานการโอนเงิน *<input type="file" id="slip" accept="image/jpeg,image/png,image/webp,application/pdf"></label>
-        <button class="submit" type="button" id="confirm">ยืนยันการชำระเงิน</button>
+        <label>แนบหลักฐานการโอนเงิน *<input type="file" id="slip" accept="image/jpeg,image/png,image/webp,application/pdf"><div id="fileStatus" style="margin-top:8px;color:#aaa;font-size:13px">ยังไม่ได้เลือกไฟล์</div></label>
+        <button class="submit" type="button" id="confirm">ยืนยันการชำระเงิน</button><div id="paymentStatus" style="display:none;margin-top:14px;padding:16px;border-radius:12px"></div>
       </div><div><img id="paymentQr" src="assets/promptpay-1990.png" alt="QR ชำระเงิน"></div></div>
       <div id="lineFollow" class="qrline hidden"><div><div class="eyebrow">ขั้นตอนสุดท้าย</div><h3>แอด LINE เพื่อแจ้งการโอนเงินและรับวันนัดหมาย</h3><p>ส่งชื่อ-นามสกุลและแจ้งแพ็กเกจที่สมัคร เพื่อให้ทีมงานตรวจสอบการชำระเงินและนัดหมายรอบเรียน</p></div><img src="assets/line-contact-qr.png" alt="QR LINE"></div>
     </div>
@@ -240,10 +240,44 @@ form.addEventListener('submit',async e=>{
   }catch(err){statusEl.textContent='บันทึกไม่สำเร็จ: '+err.message}
 });
 
+const slipInput=document.getElementById('slip');
+const fileStatus=document.getElementById('fileStatus');
+const paymentStatus=document.getElementById('paymentStatus');
+slipInput.addEventListener('change',()=>{
+  const f=slipInput.files[0];
+  fileStatus.textContent=f?'✓ แนบไฟล์แล้ว: '+f.name:'ยังไม่ได้เลือกไฟล์';
+  fileStatus.style.color=f?'#75e6a4':'#aaa';
+});
+function showPaymentStatus(ok,msg){
+  paymentStatus.style.display='block';
+  paymentStatus.style.background=ok?'#0f2a1c':'#35131c';
+  paymentStatus.style.border='1px solid '+(ok?'#246b43':'#8b2635');
+  paymentStatus.style.color=ok?'#baf5d0':'#ffc0cb';
+  paymentStatus.innerHTML=msg;
+}
 document.getElementById('confirm').addEventListener('click',()=>{
-  const file=document.getElementById('slip').files[0]; if(!file){alert('กรุณาแนบสลิปก่อนยืนยัน');return} if(!registrationId){alert('กรุณาบันทึกใบสมัครก่อน');return}
-  const btn=document.getElementById('confirm');btn.disabled=true;btn.textContent='กำลังอัปโหลดสลิป...';
-  const reader=new FileReader(); reader.onload=async()=>{try{const base64=String(reader.result).split(',')[1];const res=await postToBackend({action:'payment',registrationId,fileName:file.name,mimeType:file.type,fileBase64:base64});if(!res.ok)throw new Error(res.error||'อัปโหลดไม่สำเร็จ');document.getElementById('lineFollow').classList.remove('hidden');document.getElementById('lineFollow').scrollIntoView({behavior:'smooth',block:'center'});btn.textContent='ส่งหลักฐานแล้ว';}catch(err){btn.disabled=false;btn.textContent='ยืนยันการชำระเงิน';alert(err.message)}}; reader.readAsDataURL(file);
+  const file=slipInput.files[0];
+  if(!file){showPaymentStatus(false,'กรุณาแนบสลิปก่อนยืนยัน');return}
+  if(!registrationId){showPaymentStatus(false,'ไม่พบเลขใบสมัคร กรุณากรอกใบสมัครใหม่อีกครั้ง');return}
+  const btn=document.getElementById('confirm');btn.disabled=true;btn.textContent='กำลังส่งข้อมูลและอัปโหลดสลิป...';
+  showPaymentStatus(true,'กำลังส่งหลักฐาน กรุณาอย่าปิดหน้านี้...');
+  const reader=new FileReader();
+  reader.onload=async()=>{
+    try{
+      const base64=String(reader.result).split(',')[1];
+      const res=await postToBackend({action:'payment',registrationId,fileName:file.name,mimeType:file.type,fileBase64:base64});
+      if(!res.ok)throw new Error(res.error||'อัปโหลดไม่สำเร็จ');
+      btn.textContent='✓ ส่งหลักฐานแล้ว'; btn.disabled=true;
+      showPaymentStatus(true,'<b style="font-size:18px">✓ สมัครเรียนสำเร็จแล้ว</b><br>ระบบได้รับข้อมูลและหลักฐานการชำระเงินแล้ว<br>เลขใบสมัคร: <b>'+registrationId+'</b><br><small>สถานะ: รอตรวจสอบการชำระเงิน — ทีมงานจะตรวจสลิปก่อนยืนยันที่นั่ง</small>');
+      document.getElementById('lineFollow').classList.remove('hidden');
+      document.getElementById('lineFollow').scrollIntoView({behavior:'smooth',block:'center'});
+    }catch(err){
+      btn.disabled=false;btn.textContent='ยืนยันการชำระเงิน';
+      showPaymentStatus(false,'<b>ส่งข้อมูลไม่สำเร็จ</b><br>'+String(err.message||err)+'<br>กรุณาลองอีกครั้ง');
+    }
+  };
+  reader.onerror=()=>{btn.disabled=false;btn.textContent='ยืนยันการชำระเงิน';showPaymentStatus(false,'อ่านไฟล์สลิปไม่สำเร็จ กรุณาเลือกไฟล์ใหม่')};
+  reader.readAsDataURL(file);
 });
 </script>
 </body></html>
