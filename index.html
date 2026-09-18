@@ -220,8 +220,16 @@ let registrationId='';
 function checked(name){return [...form.querySelectorAll(`[name=${name}]:checked`)].map(x=>x.value)}
 function postToBackend(payload){
   if(APPS_SCRIPT_URL.startsWith('PASTE_')) throw new Error('ยังไม่ได้ใส่ Apps Script Web App URL');
-  const fd=new FormData(); Object.entries(payload).forEach(([k,v])=>fd.append(k,Array.isArray(v)?JSON.stringify(v):v));
-  return fetch(APPS_SCRIPT_URL,{method:'POST',body:fd}).then(r=>r.json());
+  const body=new URLSearchParams();
+  Object.entries(payload).forEach(([k,v])=>body.append(k,Array.isArray(v)?JSON.stringify(v):String(v ?? '')));
+  return fetch(APPS_SCRIPT_URL,{
+    method:'POST',
+    body:body,
+    redirect:'follow'
+  }).then(async r=>{
+    const text=await r.text();
+    try{return JSON.parse(text)}catch(_){throw new Error('Backend ตอบกลับไม่ถูกต้อง: '+text.slice(0,120))}
+  });
 }
 function makeId(){return 'AIA-'+new Date().toISOString().replace(/\D/g,'').slice(0,14)+'-'+Math.floor(100+Math.random()*900)}
 
