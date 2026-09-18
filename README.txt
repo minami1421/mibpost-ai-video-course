@@ -1,113 +1,32 @@
-AI VIDEO EDITING COURSE WEBSITE
+AI ANIMATION WORKSHOP — LIVE DATABASE PACKAGE
 
-ไฟล์หลัก
-- index.html
-- style.css
-- app.js
-- assets/mib-mascot-front.png
-- google-apps-script.gs
+ฐานข้อมูล:
+Google Sheet: AI Video Course Registration
+Tab ใหม่: Animation Registrations
+(แยกจาก Registrations งานเก่าแล้ว)
 
-HOST ฟรีได้กับ
-- GitHub Pages
-- Cloudflare Pages
-- Firebase Hosting
+ไฟล์:
+1) Code.gs   — Backend / Google Sheet / Slip upload / Admin API
+2) Public.html — เว็บ AI Animation Workshop ไฟล์ล่าสุดของคุณ + เชื่อมฐานข้อมูล
+3) Admin.html  — หลังบ้านดูยอด/ลูกค้า/สลิป และแก้เฉพาะนัดหมาย
 
-เชื่อม Google Sheets
-1) สร้าง Google Sheet ใหม่
-2) Extensions > Apps Script
-3) วางโค้ดจาก google-apps-script.gs
-4) Deploy > New deployment > Web app
-5) Execute as: Me
-6) Who has access: Anyone
-7) Copy Web App URL
-8) เปิด app.js แล้วใส่ URL ใน GOOGLE_SCRIPT_URL
+ติดตั้ง Google Apps Script:
+1. เปิด script.google.com แล้วสร้าง Project
+2. วาง Code.gs
+3. สร้าง HTML file ชื่อ Public แล้ววาง Public.html
+4. สร้าง HTML file ชื่อ Admin แล้ววาง Admin.html
+5. Deploy > New deployment > Web app
+6. Execute as: Me
+7. Who has access: เลือกตามการใช้งานของคุณ (เว็บสมัครต้องเข้าถึงได้โดยผู้สมัคร)
+8. URL ปกติ = หน้าเว็บสมัคร
+9. URL เดิมเติม ?page=admin = หลังบ้าน
 
-ราคาในหน้าเว็บปัจจุบัน
-- Video Course 990 บาท
-- Founding Batch Group Workshop: ราคาปกติ 3,990 > Early Bird 2,590 บาท/คน
-- รีวิวประสบการณ์หลังเรียน รับคืน 1,000 บาท (สุทธิ 1,590 ตามเงื่อนไข)
-- Private 1 คน 8,990 บาท
-- Private 2 คน 5,990 บาท/คน
-- Private 3 คน 4,990 บาท/คน
-- ทุกแพ็กเกจ MibPost ฟรี 1 เดือน มูลค่า 690 บาท
+Flow:
+กรอกฟอร์ม -> createRegistration() -> บันทึกสถานะ “รอชำระเงิน”
+แนบสลิป -> confirmPayment() -> อัปโหลด Drive + เปลี่ยนเป็น “รอตรวจสอบ”
+Admin -> อ่านข้อมูลสดจาก Sheet
+Admin แก้ได้เฉพาะ วันนัด / เวลา / สถานะนัด / หมายเหตุนัด
 
-
-V7 PAYMENT FLOW
-- Form -> payment page -> SCB account details -> upload slip -> Google Apps Script -> Google Drive + Google Sheet
-- QR image encodes the account number only; it is not PromptPay / Thai QR Payment and does not lock an amount.
-- Update deployed Apps Script using google-apps-script.gs and create a new deployment version.
-
-
-
-V8 SLIP FIX
-============
-แก้ปัญหาสลิปหายแล้ว:
-1) Apps Script จะสร้างชีตใหม่ชื่อ "Registrations" อัตโนมัติ
-2) สลิปจะถูกเก็บใน Google Drive โฟลเดอร์ "AI Video Course Slips"
-3) ในชีต Registrations จะมีคอลัมน์ "Slip URL" กดเปิดไฟล์ได้
-4) เว็บจะถือว่าส่งสำเร็จต่อเมื่อ Apps Script ตอบ success:true เท่านั้น
-
-วิธีอัปเดต Apps Script:
-- Extensions > Apps Script
-- วาง google-apps-script.gs นี้แทนโค้ดเดิม
-- Save
-- รัน setupRegistrationSystem() 1 ครั้งเพื่ออนุญาต Google Drive + Google Sheets
-- Deploy > Manage deployments > Edit
-- Version: New version
-- Deploy
-- ใช้ Web App URL เดิมได้
-
-
-
-V9 SYNCED VERSION
-=================
-หน้าเว็บและ Apps Script ใช้ field name ชุดเดียวกันแล้ว
-
-Frontend -> Backend:
-fullName
-phone
-line
-email
-course
-privatePeople
-amount
-paymentStatus
-source
-referrer
-facebook
-instagram
-tiktok
-youtube
-editingExperience
-editingSoftware
-editingSoftwareOther
-aiExperience
-aiTools
-aiToolsOther
-learningGoal
-learningGoalOther
-goal
-note
-registrationId
-slipName
-slipType
-slipDataUrl
-
-หลังอัปเว็บ V9 ขึ้น GitHub:
-1. ไป Google Sheet > Extensions > Apps Script
-2. วาง google-apps-script.gs ตัวนี้แทนของเดิม
-3. Save
-4. เลือก setupRegistrationSystem แล้ว Run 1 ครั้ง
-5. อนุญาต Google Sheets + Google Drive
-6. Deploy > Manage deployments > Edit
-7. เลือก New version
-8. Deploy
-9. URL /exec เดิมใช้ต่อได้ ไม่ต้องแก้เว็บ
-
-
-V10 — SCHEDULE + LINE FOLLOW-UP
-- เพิ่มให้ผู้สมัครเลือกวันที่สะดวก: จันทร์–ศุกร์ / เสาร์–อาทิตย์
-- เพิ่มช่วงเวลาสะดวก: เช้า / บ่าย / ค่ำ
-- เลือกได้มากกว่า 1 ตัวเลือก และบังคับอย่างน้อย 1 วัน + 1 เวลา
-- หลังอัปโหลดสลิปสำเร็จ แสดง QR LINE และข้อความให้แอดไลน์เพื่อแจ้งการโอนและรับวันนัดหมาย
-- Apps Script เพิ่มคอลัมน์ วันที่สะดวกเรียน และ ช่วงเวลาที่สะดวกเรียน
+หมายเหตุ assets:
+Public.html ยังอ้าง assets/... ตามเว็บต้นฉบับ (รูป/วิดีโอ/QR)
+ถ้าเอา Public.html ไปโฮสต์ใน Apps Script โดยตรง ต้องเปลี่ยน assets เป็น URL ที่เข้าถึงได้จริง หรือโฮสต์ไฟล์หน้าเว็บเดิมแล้วใช้ API backend แยกต่างหาก
