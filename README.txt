@@ -1,32 +1,10 @@
-AI ANIMATION WORKSHOP — LIVE DATABASE PACKAGE
+FIXED FLOW
+1) Google Apps Script: วาง Code.gs + Admin.html แล้ว Deploy > New deployment > Web app
+2) Execute as: Me
+3) Who has access: Anyone (หน้า public ต้องส่งใบสมัครได้)
+4) Copy URL ที่ลงท้าย /exec
+5) เปิด index.html แล้วแทน PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE ด้วย URL /exec
+6) อัป index.html กลับ GitHub ทับไฟล์เดิม
+7) หน้า Admin ที่ปลอดภัยกว่า: เปิด Apps Script URL + ?page=admin (ไม่ใช้ Admin.html บน GitHub public)
 
-ฐานข้อมูล:
-Google Sheet: AI Video Course Registration
-Tab ใหม่: Animation Registrations
-(แยกจาก Registrations งานเก่าแล้ว)
-
-ไฟล์:
-1) Code.gs   — Backend / Google Sheet / Slip upload / Admin API
-2) Public.html — เว็บ AI Animation Workshop ไฟล์ล่าสุดของคุณ + เชื่อมฐานข้อมูล
-3) Admin.html  — หลังบ้านดูยอด/ลูกค้า/สลิป และแก้เฉพาะนัดหมาย
-
-ติดตั้ง Google Apps Script:
-1. เปิด script.google.com แล้วสร้าง Project
-2. วาง Code.gs
-3. สร้าง HTML file ชื่อ Public แล้ววาง Public.html
-4. สร้าง HTML file ชื่อ Admin แล้ววาง Admin.html
-5. Deploy > New deployment > Web app
-6. Execute as: Me
-7. Who has access: เลือกตามการใช้งานของคุณ (เว็บสมัครต้องเข้าถึงได้โดยผู้สมัคร)
-8. URL ปกติ = หน้าเว็บสมัคร
-9. URL เดิมเติม ?page=admin = หลังบ้าน
-
-Flow:
-กรอกฟอร์ม -> createRegistration() -> บันทึกสถานะ “รอชำระเงิน”
-แนบสลิป -> confirmPayment() -> อัปโหลด Drive + เปลี่ยนเป็น “รอตรวจสอบ”
-Admin -> อ่านข้อมูลสดจาก Sheet
-Admin แก้ได้เฉพาะ วันนัด / เวลา / สถานะนัด / หมายเหตุนัด
-
-หมายเหตุ assets:
-Public.html ยังอ้าง assets/... ตามเว็บต้นฉบับ (รูป/วิดีโอ/QR)
-ถ้าเอา Public.html ไปโฮสต์ใน Apps Script โดยตรง ต้องเปลี่ยน assets เป็น URL ที่เข้าถึงได้จริง หรือโฮสต์ไฟล์หน้าเว็บเดิมแล้วใช้ API backend แยกต่างหาก
+ข้อมูลลูกค้าจะเข้า Animation Registrations โดยตรง

@@ -207,6 +207,7 @@ document.querySelectorAll('.hero-media, .video-card').forEach(box=>{
   });
 });
 
+const APPS_SCRIPT_URL='PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
 const form=document.getElementById('registerForm');
 const course=document.getElementById('courseSelect');
 const payment=document.getElementById('payment');
@@ -214,25 +215,35 @@ const payCourse=document.getElementById('payCourse');
 const payAmount=document.getElementById('payAmount');
 const paymentQr=document.getElementById('paymentQr');
 const statusEl=document.getElementById('status');
+let registrationId='';
 
-form.addEventListener('submit',e=>{
+function checked(name){return [...form.querySelectorAll(`[name=${name}]:checked`)].map(x=>x.value)}
+function postToBackend(payload){
+  if(APPS_SCRIPT_URL.startsWith('PASTE_')) throw new Error('ยังไม่ได้ใส่ Apps Script Web App URL');
+  const fd=new FormData(); Object.entries(payload).forEach(([k,v])=>fd.append(k,Array.isArray(v)?JSON.stringify(v):v));
+  return fetch(APPS_SCRIPT_URL,{method:'POST',body:fd}).then(r=>r.json());
+}
+function makeId(){return 'AIA-'+new Date().toISOString().replace(/\D/g,'').slice(0,14)+'-'+Math.floor(100+Math.random()*900)}
+
+form.addEventListener('submit',async e=>{
   e.preventDefault();
-  const days=[...form.querySelectorAll('[name=days]:checked')];
-  const times=[...form.querySelectorAll('[name=times]:checked')];
+  const days=checked('days'),times=checked('times');
   if(!days.length||!times.length){statusEl.textContent='กรุณาเลือกวันที่และช่วงเวลาที่สะดวกอย่างน้อย 1 ตัวเลือก';return}
   const opt=course.options[course.selectedIndex];
-  payCourse.textContent=opt.textContent;
-  payAmount.textContent=Number(opt.dataset.price||0).toLocaleString('th-TH');
-  paymentQr.src=opt.dataset.qr||'assets/promptpay-1990.png';
-  payment.classList.remove('hidden');
-  statusEl.textContent='';
-  payment.scrollIntoView({behavior:'smooth',block:'start'});
+  registrationId=registrationId||makeId();
+  const payload={action:'register',registrationId,courseCode:course.value,name:form.name.value,phone:form.phone.value,line:form.line.value,email:form.email.value,experience:form.experience.value,tools:checked('tools'),otherAI:form.otherAI.value,goalType:form.goalType.value,style:form.style.value,idea:form.idea.value,device:form.device.value,ram:form.ram.value,subs:checked('subs'),days,times,firstProject:form.firstProject.value};
+  statusEl.textContent='กำลังบันทึกใบสมัคร...';
+  try{
+    const res=await postToBackend(payload); if(!res.ok)throw new Error(res.error||'บันทึกไม่สำเร็จ');
+    payCourse.textContent=opt.textContent; payAmount.textContent=Number(opt.dataset.price||0).toLocaleString('th-TH'); paymentQr.src=opt.dataset.qr||'assets/promptpay-1990.png';
+    payment.classList.remove('hidden'); statusEl.textContent='บันทึกใบสมัครแล้ว • '+registrationId; payment.scrollIntoView({behavior:'smooth',block:'start'});
+  }catch(err){statusEl.textContent='บันทึกไม่สำเร็จ: '+err.message}
 });
 
 document.getElementById('confirm').addEventListener('click',()=>{
-  if(!document.getElementById('slip').files.length){alert('กรุณาแนบสลิปก่อนยืนยัน');return}
-  document.getElementById('lineFollow').classList.remove('hidden');
-  document.getElementById('lineFollow').scrollIntoView({behavior:'smooth',block:'center'});
+  const file=document.getElementById('slip').files[0]; if(!file){alert('กรุณาแนบสลิปก่อนยืนยัน');return} if(!registrationId){alert('กรุณาบันทึกใบสมัครก่อน');return}
+  const btn=document.getElementById('confirm');btn.disabled=true;btn.textContent='กำลังอัปโหลดสลิป...';
+  const reader=new FileReader(); reader.onload=async()=>{try{const base64=String(reader.result).split(',')[1];const res=await postToBackend({action:'payment',registrationId,fileName:file.name,mimeType:file.type,fileBase64:base64});if(!res.ok)throw new Error(res.error||'อัปโหลดไม่สำเร็จ');document.getElementById('lineFollow').classList.remove('hidden');document.getElementById('lineFollow').scrollIntoView({behavior:'smooth',block:'center'});btn.textContent='ส่งหลักฐานแล้ว';}catch(err){btn.disabled=false;btn.textContent='ยืนยันการชำระเงิน';alert(err.message)}}; reader.readAsDataURL(file);
 });
 </script>
 </body></html>
